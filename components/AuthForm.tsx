@@ -108,7 +108,7 @@ router.refresh();
           <h2 className="text-primary-100">Mockrithm</h2>
         </div>
 
-        <h3>Practice job interviews with AI</h3>
+        <h3 className="text-center">Practice job interviews with AI</h3>
 
         <Form {...form}>
           <form
@@ -155,8 +155,16 @@ router.refresh();
                 </button>
               }
             />
-
-            <Button className="btn" type="submit">
+{isSignIn && (
+  <div className="text-sm text-right">
+    <Link
+      href="/forgot-password"
+      className="text-user-primary hover:underline"
+    >
+      Forgot password?
+    </Link>
+  </div>
+)}            <Button className="btn" type="submit">
               {isSignIn ? "Sign In" : "Create an Account"}
             </Button>
           </form>

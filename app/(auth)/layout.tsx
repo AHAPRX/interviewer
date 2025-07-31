@@ -12,16 +12,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        router.replace("/"); // ✅ already signed in → redirect to home
+        router.replace("/");
       } else {
-        setCheckingAuth(false); // ✅ not signed in → show page
+        setCheckingAuth(false);
       }
     });
 
     return () => unsubscribe();
   }, [router]);
 
-  if (checkingAuth) return null; // 🔄 Wait before showing auth page
+  if (checkingAuth) return null;
 
   return <div className="auth-layout">{children}</div>;
 }

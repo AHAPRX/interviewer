@@ -14,7 +14,7 @@ interface FormFieldProps<T extends FieldValues> {
   label: string;
   placeholder?: string;
   type?: "text" | "email" | "password";
-  icon?: ReactNode; // ✅ NEW: support icon (like eye icon for password)
+  icon?: ReactNode;
 }
 
 const FormField = <T extends FieldValues>({
@@ -35,7 +35,7 @@ const FormField = <T extends FieldValues>({
           <FormControl>
             <div className="relative">
               <Input
-                className={`input ${icon ? "pr-10" : ""}`} // ✅ padding if icon is present
+                className={`input ${icon ? "pr-10" : ""}`} 
                 type={type}
                 placeholder={placeholder}
                 {...field}
