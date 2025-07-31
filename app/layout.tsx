@@ -1,7 +1,9 @@
+// app/layout.tsx
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
 
+import AuthLayout from "@/components/Authlayout";
 import "./globals.css";
 
 const monaSans = Mona_Sans({
@@ -16,14 +18,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" className="dark">
       <body className={`${monaSans.className} antialiased pattern`}>
-        {children}
-
+        <AuthLayout>
+          {children}
+        </AuthLayout>
         <Toaster />
       </body>
     </html>
