@@ -69,7 +69,7 @@ export default function FeedbackPage() {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "feedbacks"));
+        const snapshot = await getDocs(collection(db, "feedback"));
         const feedbackData = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -131,7 +131,7 @@ export default function FeedbackPage() {
 
   const handleDeleteFeedback = async (id: string) => {
     try {
-      await deleteDoc(doc(db, "feedbacks", id));
+      await deleteDoc(doc(db, "feedback", id));
       setFeedback((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error("Failed to delete feedback:", error);
@@ -140,7 +140,7 @@ export default function FeedbackPage() {
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
-      await updateDoc(doc(db, "feedbacks", id), { status: newStatus });
+      await updateDoc(doc(db, "feedback", id), { status: newStatus });
       setFeedback((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, status: newStatus } : item

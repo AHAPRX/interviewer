@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -27,15 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Send,
-  User,
-  Mail,
-  MessageSquare,
-  MapPin,
-  Phone,
-  Clock,
-} from "lucide-react";
+import { Send, User, Mail, MessageSquare, Phone, Clock } from "lucide-react";
 import { Bug, Sparkles, MessageCircle } from "lucide-react";
 // Schema
 const formSchema = z.object({
@@ -64,12 +56,20 @@ export default function ContactPage() {
 
   // Load Firebase user
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        form.setValue("name", firebaseUser.displayName || "Anonymous");
+        const userRef = doc(db, "users", firebaseUser.uid);
+        const userSnap = await getDoc(userRef);
+
+        const nameFromDb = userSnap.exists()
+          ? userSnap.data().name
+          : "Anonymous";
+
+        form.setValue("name", nameFromDb);
         form.setValue("email", firebaseUser.email || "");
       }
     });
+
     return () => unsubscribe();
   }, [form]);
 
@@ -80,7 +80,7 @@ export default function ContactPage() {
         ...values,
         createdAt: new Date(),
       });
-      toast.success("Thanks for your feedback! 🙌");
+      toast.success("Thanks for your feedback!");
       form.reset({ ...values, message: "" });
     } catch (error) {
       console.error("Feedback error:", error);
@@ -111,51 +111,244 @@ export default function ContactPage() {
       </div>
 
       {/* Hero Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-10 pt-20 pb-16 px-6"
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent"
-          >
-            Get in Touch
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed"
-          >
-            We'd love to hear from you. Send us your feedback, questions, or
-            just say hello.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-wrap justify-center gap-8 text-gray-400"
-          >
-            <div className="flex items-center gap-2">
-              <Phone className="w-5 h-5 text-gray-300" />
-              <span>+1 (555) 123-4567</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Mail className="w-5 h-5 text-gray-300" />
-              <span>hello@company.com</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gray-300" />
-              <span>Mon-Fri 9AM-6PM</span>
-            </div>
-          </motion.div>
+     {/* Enhanced Hero Section */}
+{/* Enhanced Hero Section */}
+<motion.section
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8 }}
+  className="relative z-10 pt-20 pb-20 px-6 overflow-hidden"
+>
+  {/* Animated Background Elements */}
+  <div className="absolute inset-0 pointer-events-none">
+    <motion.div
+      animate={{
+        y: [0, -20, 0],
+        opacity: [0.1, 0.3, 0.1],
+      }}
+      transition={{
+        duration: 6,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+      className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-xl"
+    />
+    <motion.div
+      animate={{
+        y: [0, 15, 0],
+        opacity: [0.05, 0.2, 0.05],
+      }}
+      transition={{
+        duration: 8,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: 2
+      }}
+      className="absolute top-40 right-20 w-24 h-24 bg-white/10 rounded-full blur-xl"
+    />
+    <motion.div
+      animate={{
+        y: [0, -10, 0],
+        opacity: [0.08, 0.25, 0.08],
+      }}
+      transition={{
+        duration: 7,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: 4
+      }}
+      className="absolute bottom-20 left-1/3 w-28 h-28 bg-white/8 rounded-full blur-xl"
+    />
+  </div>
+
+  <div className="max-w-6xl mx-auto text-center">
+    {/* Status Badge */}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, delay: 0.1 }}
+      className="inline-block mb-6"
+    >
+      <div className="relative">
+        <div className="absolute inset-0 bg-white/10 rounded-full blur-sm" />
+        <div className="relative bg-white/5 backdrop-blur-sm border border-white/20 rounded-full px-6 py-3 flex items-center gap-3">
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+          <span className="text-sm font-medium text-white">
+            ✨ We're online and ready to help
+          </span>
         </div>
-      </motion.section>
+      </div>
+    </motion.div>
+
+    {/* Main Heading with Enhanced Animation */}
+    <motion.div className="mb-8">
+      <motion.h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+        <motion.div
+          initial={{ opacity: 0, y: 50, rotateX: 90 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ 
+            duration: 1, 
+            delay: 0.2,
+            type: "spring",
+            stiffness: 100
+          }}
+          className="inline-block"
+        >
+          <span className="bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
+            Get in
+          </span>
+        </motion.div>
+        <br />
+        <motion.div
+          initial={{ opacity: 0, y: 50, rotateX: 90 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ 
+            duration: 1, 
+            delay: 0.4,
+            type: "spring",
+            stiffness: 100
+          }}
+          className="inline-block relative"
+        >
+          <span className="bg-gradient-to-r from-gray-200 via-white to-gray-300 bg-clip-text text-transparent">
+            Touch
+          </span>
+          {/* Animated underline */}
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent origin-left"
+          />
+        </motion.div>
+      </motion.h1>
+    </motion.div>
+
+    {/* Enhanced Subtitle */}
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.6 }}
+      className="mb-12"
+    >
+      <p className="text-xl md:text-2xl text-white mb-4 max-w-3xl mx-auto leading-relaxed">
+        Ready to transform your interview skills? We'd love to hear from you.
+      </p>
+      <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+        Get in touch and let's start your AI-powered journey together.
+      </p>
+    </motion.div>
+
+    {/* Enhanced Contact Info Cards */}
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.8 }}
+      className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+    >
+      {[
+        {
+          icon: Phone,
+          title: "Call Us",
+          primary: "+03001477141714",
+          secondary: "Mon-Fri 9AM-6PM",
+          href: "tel:+03001477141714",
+          gradient: "from-white/10 to-white/20",
+          iconColor: "text-white"
+        },
+        {
+          icon: Mail,
+          title: "Email Us",
+          primary: "mockrithm@gmail.com",
+          secondary: "We reply within 24 hours",
+          href: "mailto:mockrithm@gmail.com",
+          gradient: "from-white/10 to-white/20",
+          iconColor: "text-white"
+        },
+        {
+          icon: Clock,
+          title: "Support Hours",
+          primary: "24/7 Available",
+          secondary: "Live chat always open",
+          href: "#",
+          gradient: "from-white/10 to-white/20",
+          iconColor: "text-white"
+        }
+      ].map((contact, index) => (
+        <motion.a
+          key={contact.title}
+          href={contact.href}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.6, 
+            delay: 0.9 + (index * 0.1),
+            type: "spring",
+            stiffness: 100
+          }}
+          whileHover={{ 
+            y: -5, 
+            scale: 1.02,
+            transition: { type: "spring", stiffness: 400 }
+          }}
+          whileTap={{ scale: 0.98 }}
+          className="group block"
+        >
+          <div className="relative overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 h-full transition-all duration-300 group-hover:bg-white/10 group-hover:border-white/20">
+            {/* Gradient Overlay */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${contact.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`} />
+            
+            {/* Content */}
+            <div className="relative">
+              <div className="flex items-center justify-center mb-4">
+                <div className="p-3 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors duration-300">
+                  <contact.icon className={`w-6 h-6 ${contact.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                </div>
+              </div>
+              
+              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-white transition-colors">
+                {contact.title}
+              </h3>
+              
+              <p className="text-white font-medium mb-1 group-hover:text-white transition-colors">
+                {contact.primary}
+              </p>
+              
+              <p className="text-sm text-gray-300 group-hover:text-white transition-colors">
+                {contact.secondary}
+              </p>
+
+              {/* Hover indicator */}
+              <div className="mt-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent" />
+              </div>
+            </div>
+          </div>
+        </motion.a>
+      ))}
+    </motion.div>
+
+    {/* Call to Action */}
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 1.2 }}
+      className="flex flex-col sm:flex-row items-center justify-center gap-4"
+    >
+      <div className="flex items-center gap-2 text-gray-300 text-sm">
+        <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+        <span>Response time: Under 2 hours</span>
+      </div>
+      
+      <div className="hidden sm:block w-px h-4 bg-gray-600" />
+      
+      <div className="flex items-center gap-2 text-gray-300 text-sm">
+        <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+        <span>Powered by AI Technology</span>
+      </div>
+    </motion.div>
+  </div>
+</motion.section>
 
       {/* Main Content */}
       <div className="relative z-10 px-6 pb-20">

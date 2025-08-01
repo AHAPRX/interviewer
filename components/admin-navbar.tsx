@@ -1,20 +1,49 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { gsap } from "gsap"
-import { Bell, Search, User, LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react";
+import { gsap } from "gsap";
+import { Bell, Search, User, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { signOut } from "firebase/auth";
+import { auth, db } from "@/firebase/client";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { doc, getDoc } from "firebase/firestore";
 
 export function AdminNavbar() {
+  const [adminName, setAdminName] = useState("");
+  const router = useRouter();
+
+  // Fetch admin name from Firestore
+  useEffect(() => {
+    const fetchAdminName = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const docRef = doc(db, "users", user.uid);
+        const snap = await getDoc(docRef);
+
+        if (snap.exists()) {
+          const data = snap.data();
+          setAdminName(data.name || "Admin");
+        }
+      } catch (error) {
+        console.error("Failed to fetch admin name:", error);
+      }
+    };
+
+    fetchAdminName();
+  }, []);
+
   useEffect(() => {
     gsap.fromTo(
       ".navbar-item",
@@ -25,9 +54,18 @@ export function AdminNavbar() {
         duration: 0.5,
         stagger: 0.1,
         ease: "power2.out",
-      },
-    )
-  }, [])
+      }
+    );
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/sign-in");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-sm">
@@ -35,7 +73,10 @@ export function AdminNavbar() {
         <div className="navbar-item flex items-center space-x-4 lg:ml-0 ml-12">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input placeholder="Search..." className="w-64 bg-white/5 border-white/10 pl-10 focus:border-white/20" />
+            <Input
+              placeholder="Search..."
+              className="w-64 bg-white/5 border-white/10 pl-10 focus:border-white/20"
+            />
           </div>
         </div>
 
@@ -54,17 +95,28 @@ export function AdminNavbar() {
               <Button variant="ghost" className="navbar-item relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10 border border-white/20">
                   <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                  <AvatarFallback className="bg-white/10">AD</AvatarFallback>
+                  <AvatarFallback className="bg-white/10">
+                    {adminName ? adminName.slice(0, 2).toUpperCase() : "AD"}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-black/95 backdrop-blur-sm border-white/10" align="end">
-              <DropdownMenuItem className="hover:bg-white/5">
+            <DropdownMenuContent
+              className="w-46 bg-black/95 backdrop-blur-sm border-white/10"
+              align="end"
+            >
+              <div className="px-3 py-2 text-sm text-white font-medium border-b border-white/10">
+                {adminName || "Admin"}
+              </div>
+              <DropdownMenuItem
+                className="hover:bg-white/5"
+                onClick={() => router.push("/admin/profile")}
+              >
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="hover:bg-white/5 text-red-400">
+              <DropdownMenuItem className="hover:bg-white/5 text-red-400" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </DropdownMenuItem>
@@ -73,5 +125,5 @@ export function AdminNavbar() {
         </div>
       </div>
     </header>
-  )
+  );
 }

@@ -4,6 +4,8 @@ import { Mona_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 
 import AuthLayout from "@/components/Authlayout";
+import Footer from "@/components/shared/Footer";
+
 import "./globals.css";
 
 const monaSans = Mona_Sans({
@@ -28,6 +30,8 @@ export default function RootLayout({
       >
         <AuthLayout>{children}</AuthLayout>
         <Toaster />
+                <Footer />
+
       </body>
     </html>
   );
