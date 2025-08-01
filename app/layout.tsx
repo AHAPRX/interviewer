@@ -1,7 +1,7 @@
 // app/layout.tsx
-import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
+import { Toaster } from "sonner";
 
 import AuthLayout from "@/components/Authlayout";
 import "./globals.css";
@@ -12,8 +12,8 @@ const monaSans = Mona_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "PrepWise",
-  description: "An AI-powered platform for preparing for mock interviews",
+  title: "PrepWise | Admin Dashboard",
+  description: "An AI-powered platform for mock interviews and admin control",
 };
 
 export default function RootLayout({
@@ -23,10 +23,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${monaSans.className} antialiased pattern`}>
-        <AuthLayout>
-          {children}
-        </AuthLayout>
+      <body
+        className={`${monaSans.className} bg-black text-white antialiased pattern`}
+      >
+        <AuthLayout>{children}</AuthLayout>
         <Toaster />
       </body>
     </html>

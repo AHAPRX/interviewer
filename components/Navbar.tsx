@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/firebase/client";
+import { usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import Image from "next/image";
 import { doc, deleteDoc, collection, getDocs } from "firebase/firestore";
@@ -23,8 +24,8 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -33,7 +34,6 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -48,7 +48,6 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      console.log("Signed out!");
       router.push("/sign-in");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -65,24 +64,15 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
     }
 
     try {
-      // Delete all interviews
       const interviewsRef = collection(db, "users", userId, "interviews");
       const interviewDocs = await getDocs(interviewsRef);
       const deletePromises = interviewDocs.docs.map((doc) =>
         deleteDoc(doc.ref)
       );
       await Promise.all(deletePromises);
-
-      // Delete user profile from Firestore
       await deleteDoc(doc(db, "users", userId));
-
-      // Delete Firebase Auth account
       const currentUser = auth.currentUser;
-      if (currentUser) {
-        await currentUser.delete();
-      }
-
-      // Sign out and redirect
+      if (currentUser) await currentUser.delete();
       await signOut(auth);
       router.push("/sign-in");
     } catch (error) {
@@ -96,9 +86,11 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
     { href: "/contact", label: "Contact", icon: Mail },
   ];
 
+  if (pathname.startsWith("/admin")) return null;
+
+
   return (
     <>
-      {/* Backdrop blur overlay when mobile menu is open */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden"
@@ -118,15 +110,12 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
           backgroundSize: "200px 200px",
         }}
       >
-        {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-black/90" />
-
-        {/* Pattern overlay */}
         <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.3)_1px,transparent_0)] bg-[length:20px_20px]" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-          <div className="flex justify-between items-center h-16">
-            {/* Enhanced Logo */}
+          <div className="relative flex items-center h-16 justify-between">
+            {/* Left: Logo */}
             <Link
               href="/"
               className="group flex items-center space-x-3 transition-all duration-300 hover:scale-105"
@@ -138,39 +127,61 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
                   <Image
                     src="/logo.svg"
                     alt="Mockrithm Logo"
-                    width={32}
-                    height={32}
+                    width={28}
+                    height={28}
                     priority
-                    className="w-8 h-8"
+                    className="w-7 h-7"
                   />
                 </div>
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-xl font-bold text-white group-hover:text-gray-200 transition-colors duration-300">
-                  Mockrithm
+                <span className="text-[17px] font-bold text-white group-hover:text-gray-200 transition-colors duration-300">
+                  MOCKRITHM
                 </span>
-                <span className="text-xs font-medium text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                <span className="text-[12px] font-medium text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
                   Face the Machine
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="group relative px-4 py-2 rounded-lg text-gray-300 hover:text-white transition-all duration-300 hover:bg-white/10"
-                  aria-label={`${link.label} Page`}
-                >
-                  <span className="font-sm">{link.label}</span>
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                </Link>
-              ))}
+            {/* Center: Nav Links */}
+            <div className="hidden md:block absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="flex items-center space-x-1">
+               {navLinks.map((link) => {
+  const isActive = pathname === link.href;
+  const isHome = link.href === "/";
 
-              {/* Enhanced User Dropdown */}
-              <div className="relative dropdown-container ml-4">
+  return (
+    <Link
+      key={link.href}
+      href={link.href}
+      className={`group relative px-3 py-2 rounded-lg transition-all duration-300 ${
+        isActive && !isHome
+          ? "text-white bg-white/10"
+          : "text-gray-300 hover:text-white"
+      } ${isHome ? "hover:bg-transparent" : ""}`}
+      aria-label={`${link.label} Page`}
+    >
+      <span className="text-sm">{link.label}</span>
+
+      {/* Underline only if not home */}
+      {!isHome && (
+        <span
+          className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-full bg-gradient-to-r from-black via-gray-500 to-white transition-transform duration-300 ${
+            isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+          } origin-center`}
+        />
+      )}
+    </Link>
+  );
+})}
+
+              </div>
+            </div>
+
+            {/* Right: User dropdown */}
+            <div className="hidden md:flex items-center ml-auto">
+              <div className="relative dropdown-container">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="group flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
@@ -179,10 +190,10 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
                   aria-label={`User menu for ${userName}`}
                 >
                   <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
                       <User className="w-4 h-4 text-black" />
                     </div>
-                    <span className="font-medium max-w-24 truncate">
+                    <span className="text-sm max-w-24 truncate">
                       {userName}
                     </span>
                   </div>
@@ -193,7 +204,6 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
                   />
                 </button>
 
-                {/* Enhanced Dropdown Menu */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-black/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 py-2 z-10 animate-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-3 border-b border-white/20">
@@ -219,9 +229,9 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
                         handleDeleteAccount();
                         setIsDropdownOpen(false);
                       }}
-                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-gray-300 hover:bg-white/10 transition-all duration-200"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-200"
                     >
-                      <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                      <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform duration-200 text-white group-hover:text-red-300" />
                       <span>Delete Account</span>
                     </button>
                   </div>
@@ -229,7 +239,7 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
               </div>
             </div>
 
-            {/* Enhanced Mobile Menu Button */}
+            {/* Mobile Menu Toggle */}
             <button
               className="md:hidden relative p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -245,7 +255,7 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
           </div>
         </div>
 
-        {/* Enhanced Mobile Menu */}
+        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div
             className="md:hidden fixed top-16 left-0 right-0 bg-black/95 backdrop-blur-md border-b border-white/20 z-40 animate-in slide-in-from-top-2 duration-300"
@@ -255,9 +265,7 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
               backgroundSize: "200px 200px",
             }}
           >
-            {/* Dark overlay for mobile menu */}
             <div className="absolute inset-0 bg-black/90" />
-
             <div className="relative max-w-7xl mx-auto px-4 py-6 space-y-2 z-10">
               {navLinks.map((link) => {
                 const IconComponent = link.icon;
@@ -313,7 +321,6 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
         )}
       </nav>
 
-      {/* Spacer to prevent content from hiding behind fixed navbar */}
       <div className="h-16" />
     </>
   );

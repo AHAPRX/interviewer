@@ -43,60 +43,81 @@ const AuthForm = ({ type }: { type: FormType }) => {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    try {
-      if (type === "sign-up") {
-        const { name, email, password } = data;
+ const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  try {
+    if (type === "sign-up") {
+      const { name, email, password } = data;
 
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-        const result = await signUp({
-          uid: userCredential.user.uid,
-          name: name!,
-          email,
-          password,
-        });
+      const result = await signUp({
+        uid: userCredential.user.uid,
+        name: name!,
+        email,
+        password,
+      });
 
-        if (!result.success) {
-          toast.error(result.message);
-          return;
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      toast.success("Account created successfully. Please sign in.");
+      router.push("/sign-in");
+
+    } else {
+      const { email, password } = data;
+
+      let userCredential;
+      try {
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      } catch (err: any) {
+        if (err.code === "auth/user-not-found") {
+          toast.error("User not found. Please sign up first.");
+        } else if (err.code === "auth/wrong-password") {
+          toast.error("Incorrect password.");
+        } else if (err.code === "auth/invalid-email") {
+          toast.error("Invalid email format.");
+        } else {
+          toast.error(`Login failed: ${err.message}`);
         }
+        return;
+      }
 
-        toast.success("Account created successfully. Please sign in.");
-        router.push("/sign-in");
-      } else {
-        const { email, password } = data;
+      const idToken = await userCredential.user.getIdToken();
+      if (!idToken) {
+        toast.error("Sign in Failed. Please try again.");
+        return;
+      }
 
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-
-        const idToken = await userCredential.user.getIdToken();
-        if (!idToken) {
-          toast.error("Sign in Failed. Please try again.");
-          return;
-        }
-
-        await signIn({
-          email,
-          idToken,
-        });
+      await signIn({
+        email,
+        idToken,
+      });
 
       toast.success("Signed in successfully.");
-router.push("/");
-router.refresh(); 
+
+      // ✅ Redirect to /admin if this is the admin user
+      if (email === "ahmed@gmail.com") {
+        localStorage.setItem("isAdmin", "true");
+        router.push("/admin");
+      } else {
+        localStorage.removeItem("isAdmin");
+        router.push("/");
       }
-    } catch (error) {
-      console.error(error);
-      toast.error(`There was an error: ${error}`);
+
+      router.refresh();
     }
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error(`There was an error: ${error}`);
+  }
+};
+
 
   const isSignIn = type === "sign-in";
 
