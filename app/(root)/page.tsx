@@ -14,15 +14,16 @@ async function Home() {
   const user = await getCurrentUser();
 
   const [userInterviews, allInterview] = await Promise.all([
-    getInterviewsByUserId(user?.id!),
-    getLatestInterviews({ userId: user?.id! }),
+    getInterviewsByUserId(user?.id || ""), // fallback in case user is null
+    getLatestInterviews({ userId: user?.id || "" }),
   ]);
 
-  const hasPastInterviews = userInterviews?.length! > 0;
-  const hasUpcomingInterviews = allInterview?.length! > 0;
+  const hasPastInterviews = Array.isArray(userInterviews) && userInterviews.length > 0;
+  const hasUpcomingInterviews = Array.isArray(allInterview) && allInterview.length > 0;
 
   return (
     <>
+      {/* CTA Section */}
       <section className="card-cta">
         <div className="flex flex-col gap-6 max-w-lg">
           <h2>Get Interview-Ready with AI-Powered Practice & Feedback</h2>
@@ -44,12 +45,13 @@ async function Home() {
         />
       </section>
 
+      {/* Your Interviews Section */}
       <section className="flex flex-col gap-6 mt-8">
         <h2>Your Interviews</h2>
 
         <div className="interviews-section">
           {hasPastInterviews ? (
-            userInterviews?.map((interview) => (
+            userInterviews.map((interview) => (
               <InterviewCard
                 key={interview.id}
                 userId={user?.id}
@@ -66,12 +68,13 @@ async function Home() {
         </div>
       </section>
 
+      {/* All Interviews Section */}
       <section className="flex flex-col gap-6 mt-8">
         <h2>Take Interviews</h2>
 
         <div className="interviews-section">
           {hasUpcomingInterviews ? (
-            allInterview?.map((interview) => (
+            allInterview.map((interview) => (
               <InterviewCard
                 key={interview.id}
                 userId={user?.id}
