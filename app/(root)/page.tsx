@@ -1,44 +1,25 @@
-import Link from "next/link"
-import Image from "next/image"
+import Link from "next/link";
+import Image from "next/image";
 
-import { Button } from "@/components/ui/button"
-import InterviewCard from "@/components/InterviewCard"
+import { Button } from "@/components/ui/button";
+import InterviewCard from "@/components/InterviewCard";
 
-import { getCurrentUser } from "@/lib/actions/auth.action"
+import { getCurrentUser } from "@/lib/actions/auth.action";
 import {
   getInterviewsByUserId,
   getLatestInterviews,
-} from "@/lib/actions/general.action"
+} from "@/lib/actions/general.action";
 
 async function Home() {
-  const user = await getCurrentUser()
+  const user = await getCurrentUser();
 
-  // ✅ Ensure user exists
-  if (!user) {
-    return (
-      <div className="p-10 text-white">
-        <h1 className="text-2xl font-bold">Please sign in to view interviews.</h1>
-      </div>
-    )
-  }
+  const [userInterviews = [], allInterview = []] = await Promise.all([
+    getInterviewsByUserId(user?.id ?? ""),
+    getLatestInterviews({ userId: user?.id ?? "" }),
+  ]);
 
-  let userinterviews = []
-  let allinterview = []
-
-  try {
-    const results = await Promise.all([
-      getInterviewsByUserId(user.id),
-      getLatestInterviews({ userId: user.id }),
-    ])
-
-    userinterviews = results[0] || []
-    allinterview = results[1] || []
-  } catch (error) {
-    console.error("Failed to load interviews:", error)
-  }
-
-  const hasPastInterviews = userinterviews.length > 0
-  const hasUpcomingInterviews = allinterview.length > 0
+  const hasPastInterviews = Array.isArray(userInterviews) && userInterviews.length > 0;
+  const hasUpcomingInterviews = Array.isArray(allInterview) && allInterview.length > 0;
 
   return (
     <>
@@ -68,10 +49,10 @@ async function Home() {
 
         <div className="interviews-section">
           {hasPastInterviews ? (
-            userinterviews.map((interview) => (
+            userInterviews.map((interview) => (
               <InterviewCard
                 key={interview.id}
-                userId={user.id}
+                userId={user?.id}
                 interviewId={interview.id}
                 role={interview.role}
                 type={interview.type}
@@ -80,7 +61,7 @@ async function Home() {
               />
             ))
           ) : (
-            <p>You haven&apos;t taken any interviews yet.</p>
+            <p>You haven&apos;t taken any interviews yet</p>
           )}
         </div>
       </section>
@@ -90,10 +71,10 @@ async function Home() {
 
         <div className="interviews-section">
           {hasUpcomingInterviews ? (
-            allinterview.map((interview) => (
+            allInterview.map((interview) => (
               <InterviewCard
                 key={interview.id}
-                userId={user.id}
+                userId={user?.id}
                 interviewId={interview.id}
                 role={interview.role}
                 type={interview.type}
@@ -102,12 +83,12 @@ async function Home() {
               />
             ))
           ) : (
-            <p>There are no interviews available right now.</p>
+            <p>There are no interviews available</p>
           )}
         </div>
       </section>
     </>
-  )
+  );
 }
 
-export default Home
+export default Home;
