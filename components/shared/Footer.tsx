@@ -26,8 +26,8 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               <Bot className="h-5 w-5 text-black" />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-semibold tracking-tight">AI Interview</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Smart Practice Platform</p>
+              <h3 className="text-lg font-semibold tracking-tight">Mockrithm</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Face the Machine</p>
             </div>
           </div>
 

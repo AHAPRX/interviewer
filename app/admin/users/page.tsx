@@ -141,11 +141,6 @@ export default function UsersPage() {
       console.error("Failed to delete user:", err);
     }
   };
-
-  const handleEditUser = (userId: string) => {
-    alert(`Edit user ${userId} – You can build a modal or page for this.`);
-  };
-
   const router = useRouter();
 
   return (

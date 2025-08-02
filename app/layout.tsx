@@ -14,7 +14,7 @@ const monaSans = Mona_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "PrepWise | Admin Dashboard",
+  title: "Mockrithm",
   description: "An AI-powered platform for mock interviews and admin control",
 };
 

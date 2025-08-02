@@ -13,8 +13,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const [userName, setUserName] = useState<string>("");
 
   const pathname = usePathname();
-const hideNavbarOnRoutes = ["/sign-in", "/sign-up", "/forgot-password", "/verify-code", "/reset-password", "/interview", "/admin"];
-  const shouldShowNavbar = !!userId && !hideNavbarOnRoutes.includes(pathname);
+const hideNavbar =
+  pathname.startsWith("/interview/") && pathname !== "/interview" ||
+  [
+    "/sign-in",
+    "/sign-up",
+    "/forgot-password",
+    "/verify-code",
+    "/reset-password",
+    "/interview",
+    "/admin"
+  ].includes(pathname);
+
+const shouldShowNavbar = !!userId && !hideNavbar;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {

@@ -88,7 +88,6 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
 
   if (pathname.startsWith("/admin")) return null;
 
-
   return (
     <>
       {isMobileMenuOpen && (
@@ -147,35 +146,33 @@ const Navbar = ({ userId, userName }: { userId: string; userName: string }) => {
             {/* Center: Nav Links */}
             <div className="hidden md:block absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
               <div className="flex items-center space-x-1">
-               {navLinks.map((link) => {
-  const isActive = pathname === link.href;
-  const isHome = link.href === "/";
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.href;
 
-  return (
-    <Link
-      key={link.href}
-      href={link.href}
-      className={`group relative px-3 py-2 rounded-lg transition-all duration-300 ${
-        isActive && !isHome
-          ? "text-white bg-white/10"
-          : "text-gray-300 hover:text-white"
-      } ${isHome ? "hover:bg-transparent" : ""}`}
-      aria-label={`${link.label} Page`}
-    >
-      <span className="text-sm">{link.label}</span>
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`group relative px-3 py-2 rounded-lg transition-all duration-300 ${
+                        isActive
+                          ? "text-white bg-white/10"
+                          : "text-gray-300 hover:text-white"
+                      }`}
+                      aria-label={`${link.label} Page`}
+                    >
+                      <span className="text-sm">{link.label}</span>
 
-      {/* Underline only if not home */}
-      {!isHome && (
-        <span
-          className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-full bg-gradient-to-r from-black via-gray-500 to-white transition-transform duration-300 ${
-            isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-          } origin-center`}
-        />
-      )}
-    </Link>
-  );
-})}
-
+                      {/* Underline: always show for active, show on hover */}
+                      <span
+                        className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-full bg-white transition-transform duration-300 origin-center ${
+                          isActive
+                            ? "scale-x-100"
+                            : "scale-x-0 group-hover:scale-x-100"
+                        }`}
+                      />
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 

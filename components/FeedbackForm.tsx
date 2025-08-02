@@ -251,7 +251,7 @@ export default function ContactPage() {
           icon: Phone,
           title: "Call Us",
           primary: "+03001477141714",
-          secondary: "Mon-Fri 9AM-6PM",
+          secondary: "Mon-Fri `9AM-6PM",
           href: "tel:+03001477141714",
           gradient: "from-white/10 to-white/20",
           iconColor: "text-white"

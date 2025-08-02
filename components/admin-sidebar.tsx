@@ -1,22 +1,31 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { gsap } from "gsap"
-import { LayoutDashboard, Users, MessageSquare, Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
+import { useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { gsap } from "gsap";
+import {
+  LayoutDashboard,
+  Users,
+  MessageSquare,
+  ListChecks, // You can replace this icon with something more appropriate
+  Menu,
+} from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+
+// ✅ Navigation links (including Interviews)
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Interviews", href: "/admin/interviews", icon: ListChecks }, // ✅ NEW
   { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
-]
+];
 
 export function AdminSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   useEffect(() => {
     gsap.fromTo(
@@ -29,9 +38,9 @@ export function AdminSidebar() {
         stagger: 0.1,
         ease: "power2.out",
         delay: 0.2,
-      },
-    )
-  }, [])
+      }
+    );
+  }, []);
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col bg-black/95 backdrop-blur-sm border-r border-white/10">
@@ -41,26 +50,30 @@ export function AdminSidebar() {
         </h1>
       </div>
       <nav className="flex-1 space-y-2 p-4">
-        {navigation.map((item, index) => {
-          const isActive = pathname === item.href
+        {navigation.map((item) => {
+          const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
                 "sidebar-item group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-white/5",
-                isActive ? "bg-white/10 text-white shadow-lg" : "text-gray-400 hover:text-white",
+                isActive
+                  ? "bg-white/10 text-white shadow-lg"
+                  : "text-gray-400 hover:text-white"
               )}
             >
               <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
               {item.name}
-              {isActive && <div className="ml-auto h-2 w-2 rounded-full bg-gradient-to-r from-white to-gray-300" />}
+              {isActive && (
+                <div className="ml-auto h-2 w-2 rounded-full bg-gradient-to-r from-white to-gray-300" />
+              )}
             </Link>
-          )
+          );
         })}
       </nav>
     </div>
-  )
+  );
 
   return (
     <>
@@ -80,10 +93,13 @@ export function AdminSidebar() {
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0 bg-black border-white/10">
+        <SheetContent
+          side="left"
+          className="w-64 p-0 bg-black border-white/10"
+        >
           <SidebarContent />
         </SheetContent>
       </Sheet>
     </>
-  )
+  );
 }
