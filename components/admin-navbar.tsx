@@ -118,7 +118,7 @@ export function AdminNavbar() {
               <DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem className="hover:bg-white/5 text-red-400" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                Singout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
