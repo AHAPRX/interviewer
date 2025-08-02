@@ -1,10 +1,9 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 
 import AuthLayout from "@/components/Authlayout";
-import Footer from "@/components/shared/Footer";
+import FooterWrapper from "@/components/shared/FooterWrapper";
 
 import "./globals.css";
 
@@ -30,8 +29,7 @@ export default function RootLayout({
       >
         <AuthLayout>{children}</AuthLayout>
         <Toaster />
-                <Footer />
-
+        <FooterWrapper />
       </body>
     </html>
   );
