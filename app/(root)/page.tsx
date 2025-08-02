@@ -22,8 +22,8 @@ async function Home() {
     )
   }
 
-  let userInterviews = []
-  let allInterview = []
+  let userinterviews = []
+  let allinterview = []
 
   try {
     const results = await Promise.all([
@@ -31,14 +31,14 @@ async function Home() {
       getLatestInterviews({ userId: user.id }),
     ])
 
-    userInterviews = results[0] || []
-    allInterview = results[1] || []
+    userinterviews = results[0] || []
+    allinterview = results[1] || []
   } catch (error) {
     console.error("Failed to load interviews:", error)
   }
 
-  const hasPastInterviews = userInterviews.length > 0
-  const hasUpcomingInterviews = allInterview.length > 0
+  const hasPastInterviews = userinterviews.length > 0
+  const hasUpcomingInterviews = allinterview.length > 0
 
   return (
     <>
@@ -68,7 +68,7 @@ async function Home() {
 
         <div className="interviews-section">
           {hasPastInterviews ? (
-            userInterviews.map((interview) => (
+            userinterviews.map((interview) => (
               <InterviewCard
                 key={interview.id}
                 userId={user.id}
@@ -90,7 +90,7 @@ async function Home() {
 
         <div className="interviews-section">
           {hasUpcomingInterviews ? (
-            allInterview.map((interview) => (
+            allinterview.map((interview) => (
               <InterviewCard
                 key={interview.id}
                 userId={user.id}
