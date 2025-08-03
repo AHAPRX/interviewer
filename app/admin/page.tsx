@@ -59,27 +59,26 @@ export default function AdminDashboard() {
 
   // 🔐 Secure admin check
   useEffect(() => {
-    const verifyAdmin = async () => {
-      const user = auth.currentUser;
-      if (!user) {
-        router.push("/sign-in");
-        return;
-      }
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      router.push("/sign-in");
+      return;
+    }
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      const userData = userDoc.data();
+    console.log("AUTH USER:", user.email, user.uid);
 
-      if (!userDoc.exists() || userData?.role !== "admin") {
-        router.push("/not-authorized");
-      }
-    };
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    const userData = userDoc.data();
 
-    const unsubscribe = onAuthStateChanged(auth, () => {
-      verifyAdmin();
-    });
+    console.log("USER DOC:", userData);
 
-    return () => unsubscribe();
-  }, [router]);
+    if (!userDoc.exists() || userData?.role !== "admin") {
+      router.push("/not-authorized");
+    }
+  });
+
+  return () => unsubscribe();
+}, [router]);
 
   // 🚀 Fetch metrics and activity
   useEffect(() => {
