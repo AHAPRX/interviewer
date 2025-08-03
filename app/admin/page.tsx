@@ -58,23 +58,20 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   // 🔐 Secure admin check
-  useEffect(() => {
+ useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
     if (!user) {
       router.push("/sign-in");
       return;
     }
 
-    console.log("AUTH USER:", user.email, user.uid);
-
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    const userData = userDoc.data();
-
-    console.log("USER DOC:", userData);
-
-    if (!userDoc.exists() || userData?.role !== "admin") {
-      router.push("/not-authorized");
+    if (user.email !== "ahmed@gmail.com") {
+      router.push("/sign-in");
+      return;
     }
+
+    // ✅ If email matches, user can stay on admin page
+    console.log("Admin access granted");
   });
 
   return () => unsubscribe();
