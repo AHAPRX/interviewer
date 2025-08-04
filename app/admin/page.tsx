@@ -64,7 +64,12 @@ export default function AdminDashboard() {
       router.push("/sign-in");
       return;
     }
+const userDoc = await getDoc(doc(db, "users", user.uid));
+console.log("Admin UID:", user.uid);
+console.log("User document exists:", userDoc.exists());
+console.log("User data:", userDoc.data());
 
+const userData = userDoc.data();
     if (user.email !== "ahmed@gmail.com") {
       router.push("/sign-in");
       return;
