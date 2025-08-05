@@ -1,4 +1,3 @@
-// ✅ Tell Next.js this page is dynamic (fixes cookies/session build error)
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
@@ -13,7 +12,6 @@ import {
   getLatestInterviews,
 } from "@/lib/actions/general.action";
 
-// ✅ Define Interview type
 interface Interview {
   id: string;
   role: string;
@@ -26,27 +24,17 @@ export default async function Home() {
   const user = await getCurrentUser();
   const userId = user?.id || "";
 
-  let userInterviews: Interview[] = [];
-  let allInterview: Interview[] = [];
+  // Fetch data safely
+  const [userData, allData] = await Promise.all([
+    getInterviewsByUserId(userId).catch(() => []),
+    getLatestInterviews({ userId }).catch(() => []),
+  ]);
 
-  try {
-    const [userData, allData] = await Promise.all([
-      getInterviewsByUserId(userId),
-      getLatestInterviews({ userId }),
-    ]);
-
-    userInterviews = Array.isArray(userData) ? userData : [];
-    allInterview = Array.isArray(allData) ? allData : [];
-  } catch (err) {
-    console.error("Error fetching interview data:", err);
-  }
-
-  const hasPastInterviews = userInterviews.length > 0;
-  const hasUpcomingInterviews = allInterview.length > 0;
+  const userInterviews: Interview[] = Array.isArray(userData) ? userData : [];
+  const allInterview: Interview[] = Array.isArray(allData) ? allData : [];
 
   return (
     <>
-      {/* Hero Section */}
       <section className="card-cta">
         <div className="flex flex-col gap-6 max-w-lg">
           <h2>Get Interview-Ready with AI-Powered Practice & Feedback</h2>
@@ -68,11 +56,11 @@ export default async function Home() {
         />
       </section>
 
-      {/* Your Past Interviews */}
       <section className="flex flex-col gap-6 mt-8">
         <h2>Your Interviews</h2>
+
         <div className="interviews-section">
-          {hasPastInterviews ? (
+          {userInterviews.length > 0 ? (
             userInterviews.map((interview) => (
               <InterviewCard
                 key={interview.id}
@@ -90,11 +78,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Available Interviews */}
       <section className="flex flex-col gap-6 mt-8">
         <h2>Take Interviews</h2>
+
         <div className="interviews-section">
-          {hasUpcomingInterviews ? (
+          {allInterview.length > 0 ? (
             allInterview.map((interview) => (
               <InterviewCard
                 key={interview.id}
