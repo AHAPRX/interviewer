@@ -96,36 +96,53 @@ export async function getFeedbackByInterviewId(
   return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
 }
 
-export async function getLatestInterviews(
-  params: GetLatestInterviewsParams
-): Promise<Interview[] | null> {
-  const { userId, limit = 20 } = params;
+export async function getLatestInterviews({ userId, limit = 20 }): Promise<Interview[]> {
+  try {
+    const snapshot = await db
+      .collection("interviews")
+      .where("finalized", "==", true)
+      .where("userId", "!=", userId)
+      .orderBy("createdAt", "desc")
+      .limit(limit)
+      .get();
 
-  const interviews = await db
-    .collection("interviews")
-    .orderBy("createdAt", "desc")
-    .where("finalized", "==", true)
-    .where("userId", "!=", userId)
-    .limit(limit)
-    .get();
-
-  return interviews.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Interview[];
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        role: data.role || "Unknown",
+        type: data.type || "general",
+        techstack: Array.isArray(data.techstack) ? data.techstack : [],
+        createdAt: data.createdAt?.toDate?.().toISOString() ?? new Date().toISOString(),
+      };
+    });
+  } catch (err) {
+    console.error("Error in getLatestInterviews:", err);
+    return []; // ✅ Safe fallback
+  }
 }
 
-export async function getInterviewsByUserId(
-  userId: string
-): Promise<Interview[] | null> {
-  const interviews = await db
-    .collection("interviews")
-    .where("userId", "==", userId)
-    .orderBy("createdAt", "desc")
-    .get();
+export async function getInterviewsByUserId(userId: string): Promise<Interview[]> {
+  try {
+    const snapshot = await db
+      .collection("interviews")
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
+      .get();
 
-  return interviews.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Interview[];
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        role: data.role || "Unknown",
+        type: data.type || "general",
+        techstack: Array.isArray(data.techstack) ? data.techstack : [],
+        createdAt: data.createdAt?.toDate?.().toISOString() ?? new Date().toISOString(),
+      };
+    });
+  } catch (err) {
+    console.error("Error in getInterviewsByUserId:", err);
+    return []; // ✅ Safe fallback
+  }
 }
+

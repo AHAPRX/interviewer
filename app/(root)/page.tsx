@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
 import Image from "next/image";
 
@@ -12,26 +10,16 @@ import {
   getLatestInterviews,
 } from "@/lib/actions/general.action";
 
-interface Interview {
-  id: string;
-  role: string;
-  type: string;
-  techstack: string[];
-  createdAt: string;
-}
-
-export default async function Home() {
+async function Home() {
   const user = await getCurrentUser();
-  const userId = user?.id || "";
 
-  // Fetch data safely
-  const [userData, allData] = await Promise.all([
-    getInterviewsByUserId(userId).catch(() => []),
-    getLatestInterviews({ userId }).catch(() => []),
+  const [userInterviews = [], allInterview = []] = await Promise.all([
+    getInterviewsByUserId(user?.id ?? ""),
+    getLatestInterviews({ userId: user?.id ?? "" }),
   ]);
 
-  const userInterviews: Interview[] = Array.isArray(userData) ? userData : [];
-  const allInterview: Interview[] = Array.isArray(allData) ? allData : [];
+  const hasPastInterviews = Array.isArray(userInterviews) && userInterviews.length > 0;
+  const hasUpcomingInterviews = Array.isArray(allInterview) && allInterview.length > 0;
 
   return (
     <>
@@ -60,11 +48,11 @@ export default async function Home() {
         <h2>Your Interviews</h2>
 
         <div className="interviews-section">
-          {userInterviews.length > 0 ? (
+          {hasPastInterviews ? (
             userInterviews.map((interview) => (
               <InterviewCard
                 key={interview.id}
-                userId={userId}
+                userId={user?.id}
                 interviewId={interview.id}
                 role={interview.role}
                 type={interview.type}
@@ -82,11 +70,11 @@ export default async function Home() {
         <h2>Take Interviews</h2>
 
         <div className="interviews-section">
-          {allInterview.length > 0 ? (
+          {hasUpcomingInterviews ? (
             allInterview.map((interview) => (
               <InterviewCard
                 key={interview.id}
-                userId={userId}
+                userId={user?.id}
                 interviewId={interview.id}
                 role={interview.role}
                 type={interview.type}
@@ -102,3 +90,5 @@ export default async function Home() {
     </>
   );
 }
+
+export default Home;
